@@ -1,0 +1,42 @@
+.hit, .stay {
+  float: left;
+}
+
+.stay {
+  margin: 0 20px;
+}
+
+.card {
+  height: 125px;
+  margin: 10px;
+  border: 15px solid #ffffff;
+  border-radius: 5%;
+  box-shadow: 1px 1px 0 1px #cccccc,
+}
+
+.well {
+  padding: 0 10px;
+}
+
+.alert {
+  margin-bottom: 0;
+}
+
+.navbar-fixed-top .navbar-inner, .navbar-static-top, .navbar-inner {
+  background-color: white;
+  border: none;
+  background-image: none;
+  box-shadow: none;
+}
+
+.navbar-fixed-top .navbar-inner ul {
+  float: right;
+}
+
+#new_game {
+  border: 1px solid #333333;
+  border-radius: 5px;
+  margin-top: 5px;
+  margin-right: -8px;
+  padding: 7px;
+}

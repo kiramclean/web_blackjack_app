@@ -1,0 +1,46 @@
+<div class="container">
+  <h3>Welcome to Blackjack, <%= session[:player_name] %>!</h3>
+
+    <h3>Do you want to play again?</h3>
+    <button class="btn-success"><a href="/">Yes</a></button>
+    <button class="btn-danger"><a href="/game_over">No</a></button>
+
+
+  <div class="well">
+    <h5>The dealer's cards are:</h5>
+      <% session[:dealer_cards].each do |card| %>
+
+        <%= display_card_image(card) %>
+      <% end %>
+      <h5>Dealer's total is <%= calculate_total(session[:dealer_cards]) %>.</h5>
+  </div>
+
+  <% if @show_dealer_button %>
+    <form action="/dealer/hit" method="post">
+      <button class="btn btn-primary">Show dealer's next card...</button>
+    </form>
+  <% end %>
+
+  <div class="well">
+    <h5>Your cards are:</h5>
+      <% session[:player_cards].each do |card| %>
+        <%= display_card_image(card) %>
+      <% end %>
+      <h5>Your total is <%= calculate_total(session[:player_cards]) %>.</h5>
+  </div>
+
+  <% unless @error || @success %>
+    <h4>Do you want to hit or stay?</h4>
+    <form class="hit" action="/hit" method="post">
+      <button class="btn btn-success">Hit</button>
+    </form>
+    <form class="stay" action="/stay" method="post">
+      <button class="btn btn-danger">Stay</button>
+    </form>
+  <% end %>
+
+
+
+
+
+</div>
