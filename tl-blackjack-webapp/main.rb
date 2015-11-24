@@ -6,6 +6,13 @@ use Rack::Session::Cookie, :key => 'rack.session',
                            :path => '/',
                            :secret => 'password_here'
 
+BLACKJACK = 21
+DEALER_MIN_HIT = 17
+
+before do
+  @hide_first_card = true
+end
+
 helpers do
   def calculate_total(cards)
     array_of_faces = cards.map { |pair| pair[0] }
@@ -23,37 +30,41 @@ helpers do
 
     #correct for aces
     array_of_faces.count { |face| face == "A" }.times do
-      total -= 10 if total > 21
+      total -= 10 if total > BLACKJACK
     end
     total
   end
 
   def display_card_image(card)
     suit = case card[1]
-      when "H" then
-        "hearts"
-      when "D"
-        "diamonds"
-      when "C"
-        "clubs"
-      when "S"
-        "spades"
-      end
+           when "H" then "hearts"
+           when "D" then "diamonds"
+           when "C" then "clubs"
+           when "S" then "spades"
+           end
 
     value = card[0]
     if ['J', 'Q', 'K', 'A'].include?(value)
       value = case card[0]
-      when "J"
-        "jack"
-      when "Q"
-        "queen"
-      when "K"
-        "king"
-      when "A"
-        "ace"
-      end
+              when "J" then "jack"
+              when "Q" then "queen"
+              when "K" then "king"
+              when "A" then "ace"
+              end
     end
-    "<img src='images/cards/#{suit}_#{value}.jpg' class='card'>"
+    "<img src='images/cards/#{suit}_#{value}.jpg' class='card' />"
+  end
+
+  def win(msg)
+    @success = msg
+    @play_again = true
+    @hide_first_card = false
+  end
+
+  def lose(msg)
+    @error = msg
+    @play_again = true
+    @hide_first_card = false
   end
 end
 
@@ -84,39 +95,40 @@ get '/game' do
   session[:deck] = values.product(suits).shuffle!
   session[:player_cards] = []
   session[:dealer_cards] = []
-    session[:player_cards] << session[:deck].pop
-    session[:dealer_cards] << session[:deck].pop
-    session[:player_cards] << session[:deck].pop
-    session[:dealer_cards] << session[:deck].pop
-  if calculate_total(session[:player_cards]) == 21
-    @success = "Whoa that's lucky! You hit blackjack, congratulations!"
-  elsif calculate_total(session[:dealer_cards]) == 21
-    @error = "Whoa that's lucky! Dealer hit blackjack. Maybe next time."
+    2.times do
+      session[:player_cards] << session[:deck].pop
+      session[:dealer_cards] << session[:deck].pop
+    end
+  if calculate_total(session[:player_cards]) == BLACKJACK
+    win("Whoa that's lucky! You hit blackjack, congratulations!")
+  elsif calculate_total(session[:dealer_cards]) == BLACKJACK
+    lose("Whoa that's lucky! Dealer hit blackjack. Maybe next time.")
   end
   erb :game
 end
 
 post '/hit' do
   session[:player_cards] << session[:deck].pop
-  if calculate_total(session[:player_cards]) > 21
-    @error = "Oh no! You busted! Maybe next time."
-  elsif calculate_total(session[:player_cards]) == 21
-    @success = "Congratulations! You hit blackjack."
+  if calculate_total(session[:player_cards]) > BLACKJACK
+    lose("Oh no! You busted! Maybe next time.")
+  elsif calculate_total(session[:player_cards]) == BLACKJACK
+    win("Congratulations! You hit blackjack.")
   end
   erb :game
 end
 
 post '/stay' do
-  @success = "You chose to stay with a total of #{calculate_total(session[:player_cards])}."
+  win("You chose to stay with a total of #{calculate_total(session[:player_cards])}.")
   redirect '/dealer'
 end
 
 get '/dealer' do
-  if calculate_total(session[:dealer_cards]) == 21
-    @error = "Oh no! Dealer hit blackjack. Maybe next time."
-  elsif calculate_total(session[:dealer_cards]) > 21
-    @success = "Congrats! Dealer busts, you win!"
-  elsif calculate_total(session[:dealer_cards]) < 17
+  @hide_first_card = false
+  if calculate_total(session[:dealer_cards]) == BLACKJACK
+    lose("Oh no! Dealer hit blackjack. Maybe next time.")
+  elsif calculate_total(session[:dealer_cards]) > BLACKJACK
+    win("Congrats! Dealer busts, you win!")
+  elsif calculate_total(session[:dealer_cards]) < DEALER_MIN_HIT
     @show_dealer_button = true
   else 
     redirect '/compare'
@@ -130,15 +142,20 @@ post '/dealer/hit' do
 end
 
 get '/compare' do
+  @hide_first_card = false
   player_total = calculate_total(session[:player_cards])
   dealer_total = calculate_total(session[:dealer_cards])
   if player_total > dealer_total
-    @success = "Congratulations! You win!"
+    win("Congratulations! You win!")
   elsif player_total < dealer_total
-    @error = "Oh no! Dealer wins. Maybe next time."
+    lose("Oh no! Dealer wins. Maybe next time.")
   else
-    @error = "It's a tie."
+    lose("It's a tie.")
   end
 
   erb :game
+end
+
+get '/game_over' do
+  erb :game_over
 end

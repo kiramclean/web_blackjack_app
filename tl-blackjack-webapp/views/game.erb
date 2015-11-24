@@ -1,23 +1,32 @@
 <div class="container">
-  <h3>Welcome to Blackjack, <%= session[:player_name] %>!</h3>
+  <% unless @play_again %>  
+    <h3>Welcome to Blackjack, <%= session[:player_name] %>!</h3>
+  <% end %>
 
+  <% if @play_again %>
     <h3>Do you want to play again?</h3>
-    <button class="btn-success"><a href="/">Yes</a></button>
-    <button class="btn-danger"><a href="/game_over">No</a></button>
+    <a href="/" id="yes" class="btn btn-success">Yes</a>
+    <a href="/game_over" id="no" class="btn btn-danger">No</a>
+  <% end %>
 
 
   <div class="well">
     <h5>The dealer's cards are:</h5>
-      <% session[:dealer_cards].each do |card| %>
-
-        <%= display_card_image(card) %>
+      <% session[:dealer_cards].each_with_index do |card, index| %>
+        <% if index == 0 && @hide_first_card %>
+          <img src='images/cards/cover.jpg' class='card' />
+        <% else %>
+          <%= display_card_image(card) %>
+        <% end %>
       <% end %>
-      <h5>Dealer's total is <%= calculate_total(session[:dealer_cards]) %>.</h5>
+      <% unless @hide_first_card %>
+        <h5>Dealer's total is <%= calculate_total(session[:dealer_cards]) %>.</h5>
+      <% end %>
   </div>
 
   <% if @show_dealer_button %>
     <form action="/dealer/hit" method="post">
-      <button class="btn btn-primary">Show dealer's next card...</button>
+      <button class="btn btn-info">Show dealer's next card...</button>
     </form>
   <% end %>
 
@@ -38,9 +47,4 @@
       <button class="btn btn-danger">Stay</button>
     </form>
   <% end %>
-
-
-
-
-
 </div>
