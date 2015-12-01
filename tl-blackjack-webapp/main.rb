@@ -8,6 +8,7 @@ use Rack::Session::Cookie, :key => 'rack.session',
 
 BLACKJACK = 21
 DEALER_MIN_HIT = 17
+INITIAL_POT = 1000
 
 before do
   @hide_first_card = true
@@ -58,25 +59,28 @@ helpers do
   def win(msg)
     @success = msg
     @play_again = true
+    session[:money_left] += session[:bet]
     @hide_first_card = false
   end
 
   def lose(msg)
     @error = msg
     @play_again = true
+    session[:money_left] -= session[:bet]
     @hide_first_card = false
   end
 end
 
 get '/' do
   if session[:player_name]
-    redirect '/game'
+    redirect '/betting'
   else
     redirect '/new_player'
   end
 end
 
 get '/new_player' do
+  session[:money_left] = INITIAL_POT
   erb :new_player
 end
 
@@ -86,7 +90,25 @@ post '/new_player' do
     halt erb :new_player
   end
   session[:player_name] = params[:player_name]
-  redirect '/game'
+  redirect '/betting'
+end
+
+get '/betting' do
+  session[:bet] = nil
+  erb :betting
+end
+
+post '/betting' do
+  if params[:bet].nil? || params[:bet].to_i == 0
+    @error = "Please bet at least $1."
+    halt erb :betting
+  elsif params[:bet].to_i > session[:money_left]
+    @error = "You can't bet more than you have!"
+    halt erb :betting
+  else
+    session[:bet] = params[:bet].to_i
+    redirect '/game'    
+  end
 end
 
 get '/game' do
@@ -125,9 +147,9 @@ end
 get '/dealer' do
   @hide_first_card = false
   if calculate_total(session[:dealer_cards]) == BLACKJACK
-    lose("Oh no! Dealer hit blackjack. Maybe next time.")
+    lose("Oh no! Dealer hit blackjack. You lose $#{session[:bet]}. Maybe next time.")
   elsif calculate_total(session[:dealer_cards]) > BLACKJACK
-    win("Congrats! Dealer busts, you win!")
+    win("Congrats! Dealer busts, you win $#{session[:bet]}!")
   elsif calculate_total(session[:dealer_cards]) < DEALER_MIN_HIT
     @show_dealer_button = true
   else 
@@ -146,9 +168,9 @@ get '/compare' do
   player_total = calculate_total(session[:player_cards])
   dealer_total = calculate_total(session[:dealer_cards])
   if player_total > dealer_total
-    win("Congratulations! You win!")
+    win("Congratulations! You win $#{session[:bet]}!")
   elsif player_total < dealer_total
-    lose("Oh no! Dealer wins. Maybe next time.")
+    lose("Oh no! Dealer wins. You lose $#{session[:bet]}. Maybe next time.")
   else
     lose("It's a tie.")
   end

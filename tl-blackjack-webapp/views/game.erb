@@ -1,11 +1,13 @@
 <div class="container">
-  <% unless @play_again %>  
+
+  <% unless @play_again %>
     <h3>Welcome to Blackjack, <%= session[:player_name] %>!</h3>
+    <h4>Current bet: $<%= session[:bet] %>. You have $<%= session[:money_left] %> left.</h4>
   <% end %>
 
   <% if @play_again %>
     <h3>Do you want to play again?</h3>
-    <a href="/" id="yes" class="btn btn-success">Yes</a>
+    <a href="/betting" id="yes" class="btn btn-success">Yes</a>
     <a href="/game_over" id="no" class="btn btn-danger">No</a>
   <% end %>
 

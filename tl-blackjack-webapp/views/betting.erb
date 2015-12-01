@@ -1,0 +1,6 @@
+<h4>You have $<%= session[:money_left].to_i %>.</h4>
+<h5>How much do you want to bet this round?</h5>
+<form action="/betting" method="post">
+  $ <input type='text' name='bet' /><br><br>
+  <input type='submit' class='btn btn-info' value='Make a bet'/>
+</form>

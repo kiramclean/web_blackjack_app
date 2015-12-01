@@ -27,8 +27,11 @@
   margin-right: 15px;
 }
 
+h4 {
+  padding: 5px 0;
+}
 
-/*.navbar-fixed-top .navbar-inner, .navbar-static-top, .navbar-inner {
+.navbar-fixed-top .navbar-inner, .navbar-static-top, .navbar-inner {
   background-color: white;
   border: none;
   background-image: none;
@@ -45,4 +48,4 @@
   margin-top: 5px;
   margin-right: -8px;
   padding: 7px;
-}*/
+}
