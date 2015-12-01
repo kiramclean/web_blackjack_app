@@ -122,9 +122,9 @@ get '/game' do
       session[:dealer_cards] << session[:deck].pop
     end
   if calculate_total(session[:player_cards]) == BLACKJACK
-    win("Whoa that's lucky! You hit blackjack, congratulations!")
+    win("Whoa that's lucky! You hit blackjack, congratulations! You win $#{session[:bet]}.")
   elsif calculate_total(session[:dealer_cards]) == BLACKJACK
-    lose("Whoa that's lucky! Dealer hit blackjack. Maybe next time.")
+    lose("Whoa that's lucky! Dealer hit blackjack. You lose $#{session[:bet]}. Maybe next time.")
   end
   erb :game
 end
@@ -132,9 +132,9 @@ end
 post '/hit' do
   session[:player_cards] << session[:deck].pop
   if calculate_total(session[:player_cards]) > BLACKJACK
-    lose("Oh no! You busted! Maybe next time.")
+    lose("Oh no! You busted! You lose $#{session[:bet]}. Maybe next time.")
   elsif calculate_total(session[:player_cards]) == BLACKJACK
-    win("Congratulations! You hit blackjack.")
+    win("Congratulations! You hit blackjack. You win $#{session[:bet]}.")
   end
   erb :game
 end
